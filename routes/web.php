@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\BookController;
+use Illuminate\Support\Facades\Auth;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -56,4 +58,14 @@ Route::patch('admin/books/update', [AdminController::class, 'update_book'])
 //PRINT PDF
 Route::get('admin/print_books', [AdminController::class, 'print_books'])
     ->name('admin.print.books')
+    ->middleware('is_admin');
+
+
+//Export
+Route::get('admin/books/export', [AdminController::class, 'export'])
+    ->name('admin.book.export')
+    ->middleware('is_admin');
+
+Route::post('admin/books/import', [AdminController::class, 'import'])
+    ->name('admin.book.import')
     ->middleware('is_admin');

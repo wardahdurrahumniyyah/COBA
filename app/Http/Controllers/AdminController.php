@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 
+use App\Export\BooksExport;
+use App\Exports\BooksExport as ExportsBooksExport;
+use App\Imports\BooksImport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -51,7 +55,7 @@ class AdminController extends Controller
         return redirect()->route('admin.books')->with($notification);
     }
 
-public function update_book(Request $req)
+    public function update_book(Request $req)
     {
         $book = Book::find($req->get('id'));
 
@@ -68,7 +72,7 @@ public function update_book(Request $req)
                 'public/cover_buku',
                 $filename
             );
-            Storage::delete('public/cover_buku/'.$req->get('old_cover'));
+            Storage::delete('public/cover_buku/' . $req->get('old_cover'));
 
             $book->cover = $filename;
         }
@@ -86,7 +90,7 @@ public function update_book(Request $req)
     {
         $book = Book::find($req->get('id'));
 
-        storage::delete('public/cover_buku/'.$req->get('old_cover'));
+        storage::delete('public/cover_buku/' . $req->get('old_cover'));
 
         $book->delete();
 
@@ -98,12 +102,26 @@ public function update_book(Request $req)
         return redirect()->route('admin.books')->with($notification);
     }
 
-
-    public function print_books(){
+    public function print_books()
+    {
         $books = Book::all();
 
-        $pdf = PDF::loadview('print_books', ['books' => $books]);
+        $pdf   = PDF::loadview('print_books', ['books' => $books]);
         return $pdf->download('data_buku.pdf');
     }
+    public function export()
+    {
+        return Excel::download(new ExportsBooksExport, 'books.xlsx');
+    }
 
+    public function import(Request $req)
+    {
+        Excel::import(new BooksImport, $req->file('file'));
+
+        $notification = array(
+            'message' => 'Import data berhasil dilakukan',
+            'alert-type' => 'success',
+        );
+        return redirect()->route('admin.books')->with($notification);
+    }
 }
